@@ -12,6 +12,7 @@
 #include "Parser.h"
 #include <AK/Array.h>
 #include <AK/CharacterTypes.h>
+#include <AK/FlyString.h>
 #include <AK/HashTable.h>
 #include <AK/ScopeGuard.h>
 #include <AK/StdLibExtras.h>
@@ -3016,7 +3017,7 @@ Vector<FunctionParameter> Parser::parse_formal_parameters(int& function_length, 
     return parameters;
 }
 
-static AK::Array<DeprecatedFlyString, 36> s_reserved_words = { "break", "case", "catch", "class", "const", "continue", "debugger", "default", "delete", "do", "else", "enum", "export", "extends", "false", "finally", "for", "function", "if", "import", "in", "instanceof", "new", "null", "return", "super", "switch", "this", "throw", "true", "try", "typeof", "var", "void", "while", "with" };
+static AK::Array<FlyString, 36> s_reserved_words = { "break"_fly_string, "case"_fly_string, "catch"_fly_string, "class"_fly_string, "const"_fly_string, "continue"_fly_string, "debugger"_fly_string, "default"_fly_string, "delete"_fly_string, "do"_fly_string, "else"_fly_string, "enum"_fly_string, "export"_fly_string, "extends"_fly_string, "false"_fly_string, "finally"_fly_string, "for"_fly_string, "function"_fly_string, "if"_fly_string, "import"_fly_string, "in"_fly_string, "instanceof"_fly_string, "new"_fly_string, "null"_fly_string, "return"_fly_string, "super"_fly_string, "switch"_fly_string, "this"_fly_string, "throw"_fly_string, "true"_fly_string, "try"_fly_string, "typeof"_fly_string, "var"_fly_string, "void"_fly_string, "while"_fly_string, "with"_fly_string };
 
 RefPtr<BindingPattern const> Parser::parse_binding_pattern(Parser::AllowDuplicates allow_duplicates, Parser::AllowMemberExpressions allow_member_expressions)
 {
@@ -4458,7 +4459,7 @@ void Parser::discard_saved_state()
 void Parser::check_identifier_name_for_assignment_validity(DeprecatedFlyString const& name, bool force_strict)
 {
     // FIXME: this is now called from multiple places maybe the error message should be dynamic?
-    if (any_of(s_reserved_words, [&](auto& value) { return name == value; })) {
+    if (any_of(s_reserved_words, [&](auto& value) { return name == value.to_deprecated_fly_string(); })) {
         syntax_error("Binding pattern target may not be a reserved word");
     } else if (m_state.strict_mode || force_strict) {
         if (name.is_one_of("arguments"sv, "eval"sv))
