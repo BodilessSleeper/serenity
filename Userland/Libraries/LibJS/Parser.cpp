@@ -4476,18 +4476,18 @@ bool Parser::match_with_clause() const
     return !m_state.current_token.trivia_contains_line_terminator() && m_state.current_token.original_value() == "assert"sv;
 }
 
-DeprecatedFlyString Parser::consume_string_value()
+FlyString Parser::consume_string_value()
 {
     VERIFY(match(TokenType::StringLiteral));
     auto string_token = consume();
-    DeprecatedFlyString value = parse_string_literal(string_token)->value();
+    FlyString value = FlyString::from_utf8(parse_string_literal(string_token)->value()).release_value_but_fixme_should_propagate_errors();
 
     // This also checks IsStringWellFormedUnicode which makes sure there is no unpaired surrogate
     // Surrogates are at least 3 bytes
-    if (value.length() < 3)
+    if (value.code_points().length() < 3)
         return value;
 
-    Utf8View view { value.view().substring_view(value.length() - 3) };
+    Utf8View view { value.code_points().substring_view(value.code_points().length() - 3) };
     VERIFY(view.length() <= 3);
     auto codepoint = *view.begin();
     if (Utf16View::is_high_surrogate(codepoint)) {
@@ -4508,7 +4508,7 @@ ModuleRequest Parser::parse_module_request()
         return ModuleRequest { "!!invalid!!" };
     }
 
-    ModuleRequest request { consume_string_value() };
+    ModuleRequest request { consume_string_value().to_deprecated_fly_string() };
 
     if (!match_with_clause())
         return request;
@@ -4659,7 +4659,7 @@ NonnullRefPtr<ImportStatement const> Parser::parse_import_statement(Program& pro
                 }
             } else if (match(TokenType::StringLiteral)) {
                 // ImportSpecifier : ModuleExportName as ImportedBinding
-                auto name = consume_string_value();
+                auto name = consume_string_value().to_deprecated_fly_string();
 
                 if (!match_as())
                     expected("as");
@@ -4882,7 +4882,7 @@ NonnullRefPtr<ExportStatement const> Parser::parse_export_statement(Program& pro
                 // Only for export { "a" as "b" }; // <-- no from
                 if (lhs)
                     check_for_from = FromSpecifier::Required;
-                return consume_string_value();
+                return consume_string_value().to_deprecated_fly_string();
             }
             expected("ExportSpecifier (string or identifier)");
             return {};

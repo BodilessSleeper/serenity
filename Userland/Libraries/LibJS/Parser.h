@@ -271,7 +271,7 @@ private:
     bool parse_directive(ScopeNode& body);
     void parse_statement_list(ScopeNode& output_node, AllowLabelledFunction allow_labelled_functions = AllowLabelledFunction::No);
 
-    DeprecatedFlyString consume_string_value();
+    FlyString consume_string_value();
     ModuleRequest parse_module_request();
 
     struct RulePosition {
