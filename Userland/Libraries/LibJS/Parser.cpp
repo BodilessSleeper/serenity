@@ -1272,7 +1272,7 @@ NonnullRefPtr<ClassExpression const> Parser::parse_class_expression(bool expect_
     Vector<NonnullRefPtr<ClassElement const>> elements;
     RefPtr<Expression const> super_class;
     RefPtr<FunctionExpression const> constructor;
-    HashTable<DeprecatedFlyString> found_private_names;
+    HashTable<StringView> found_private_names;
 
     RefPtr<Identifier const> class_name;
     if (expect_class_name || match_identifier() || match(TokenType::Yield) || match(TokenType::Await)) {
